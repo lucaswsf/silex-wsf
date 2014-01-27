@@ -33,9 +33,15 @@ $app->get('/', function () use ($app) {
 
 //Création route /admin
 $app->get('/admin', function () use ($app) {
-    return include __DIR__.'/../pages/admin.php';
+    $c = new AdminController($app);
+    return $c->getArticle();
 });
 
+//route post /admin
+$app->post('/admin', function () use ($app) {
+    $c = new AdminController($app);
+    return $c->postArticle();
+});
 
 //run app
 $app->run();
