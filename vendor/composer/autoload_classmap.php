@@ -7,5 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'AdminController' => $baseDir . '/pages/AdminController.php',
+    'HomeController' => $baseDir . '/pages/HomeController.php',
     'SessionHandlerInterface' => $vendorDir . '/symfony/http-foundation/Symfony/Component/HttpFoundation/Resources/stubs/SessionHandlerInterface.php',
 );

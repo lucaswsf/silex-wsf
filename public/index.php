@@ -28,7 +28,8 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 
 //Création route home
 $app->get('/', function () use ($app) {
-    return include __DIR__.'/../pages/home.php';
+    $c = new HomeController($app);
+    return $c->getIndex();
 });
 
 //Création route /admin
