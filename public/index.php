@@ -1,15 +1,19 @@
 <?php
 
-// web/index.php
-
+// Autoload Composer
 require_once __DIR__.'/../vendor/autoload.php';
 
+//Init silex application
 $app = new Silex\Application();
 
+
+//Debug
 $app['debug'] = true;
 
+//load config
 require_once __DIR__.'/../config/database.php';
 
+//init Database
 $app['sql'] = new Blog\Sql(
     $config['server'],
     $config['database'],
@@ -17,27 +21,21 @@ $app['sql'] = new Blog\Sql(
     $config['password']
 );
 
-
+//Register twig
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/../views',
 ));
 
-$app->get('/hello/{name}', function ($name) use ($app) {
-    return $app['twig']->render('hello.twig', array(
-        'name' => $name,
-    ));
-});
-
+//Création route home
 $app->get('/', function () use ($app) {
     return include __DIR__.'/../pages/home.php';
 });
 
-$app->get('/shell', function () use ($app) {
-    return include __DIR__.'/../pages/shell.php';
+//Création route /admin
+$app->get('/admin', function () use ($app) {
+    return include __DIR__.'/../pages/admin.php';
 });
 
-$app->post('/shell', function () use ($app) {
-    return include __DIR__.'/../pages/shell.php';
-});
 
+//run app
 $app->run();
