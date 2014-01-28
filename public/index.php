@@ -63,5 +63,19 @@ $app->post('/login', function () use ($app) {
 })
 ->bind('postLogin');
 
+//route user login
+$app->get('/register', function () use ($app) {
+    $c = new UserController($app);
+    return $c->getRegister();
+})
+->bind('register');
+
+//route user login
+$app->post('/register', function () use ($app) {
+    $c = new UserController($app);
+    return $c->postRegister();
+})
+->bind('postRegister');
+
 //run app
 $app->run();

@@ -5,11 +5,81 @@ use Blog\Controller;
 Class UserController extends Controller
 {
 
+    /**
+     * [getLogin description]
+     * @return [type] [description]
+     */
     public function getLogin()
     {
-        $data = array();
 
-        return $this->app['twig']->render('user/login.twig', $data);
+        return $this->app['twig']->render('user/login.twig', $this->data);
+    }
+
+    /**
+     * [getRegister description]
+     * @return [type] [description]
+     */
+    public function getRegister()
+    {
+
+        return $this->app['twig']->render('user/register.twig', $this->data);
+    }
+
+    /**
+     * [postRegister description]
+     * @return [type] [description]
+     */
+    public function postRegister()
+    {
+
+        $email = $this->app['request']->get('email');
+        $password = $this->app['request']->get('password');
+        $password_confirmation = $this->app['request']->get('password_confirmation');
+        $name = $this->app['request']->get('name');
+
+        //Verification du password
+        if ($password !== $password_confirmation) {
+            $this->data['errors'][] = 'Password doesn\'t match';
+        }
+
+        //Verification de l'email
+        $sql = "SELECT email FROM users WHERE email = :email";
+        $arguments = array(
+            ':email' => $email
+        );
+        $emailVerif = $this->app['sql']->prepareExec($sql, $arguments);
+
+        if ($emailVerif->fetch() !== false) {
+            $this->data['errors'][] = 'This email already exist.';
+        }
+
+        //Si erreurs réafficher le forumluaire.
+        if (!empty($this->data['errors'])) {
+            return $this->getRegister();
+        }
+
+        //Insertion dans la base de donnés
+        $salt = uniqid();
+        $password = sha1($password.$salt);
+
+        $sql = "INSERT INTO  users (
+                    email ,
+                    password ,
+                    name ,
+                    salt
+                )
+                VALUES (
+                    :email, :password, :name, :salt
+                )";
+        $arguments = array(
+            ':email' => $email,
+            ':password' => $password,
+            ':name' => $name,
+            ':salt' => $salt
+        );
+        $this->app['sql']->prepareExec($sql, $arguments);
+
+        return $this->app['twig']->render('user/register-success.twig', $this->data);
     }
 
 }
