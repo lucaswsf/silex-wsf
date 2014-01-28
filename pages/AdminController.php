@@ -15,6 +15,12 @@ Class AdminController extends Controller
     {
         $data = array();
 
+        if ($this->isLogged() === false) {
+            return $this->app->redirect(
+                $this->app['url_generator']->generate('home')
+            );
+        }
+
         return $this->app['twig']->render('admin.twig', $data);
     }
 

@@ -9,6 +9,8 @@ Class HomeController extends Controller
     {
         $data = array();
 
+        $data['user'] = $this->isLogged();
+
         $articles = $this->app['sql']->query('SELECT * FROM  articles');
         $data['articles'] = $articles->fetchAll();
 

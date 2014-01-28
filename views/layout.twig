@@ -15,6 +15,15 @@
                     </li>
                 </ul>
             </nav>
+            <div>
+            {% if user is defined %}
+                {% if user %}
+                    <p>Bienvenue, {{ user.name }}</p>
+                {% else  %}
+                    <a href="{{ app.url_generator.generate('login') }}">Login</a>
+                {% endif %}
+            {% endif %}
+            </div>
         </header>
         <div id="content">{% block content %}{% endblock %}</div>
         <div id="footer">

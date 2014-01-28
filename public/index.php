@@ -27,6 +27,8 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 ));
 //register service url generator
 $app->register(new Silex\Provider\UrlGeneratorServiceProvider());
+//register service session
+$app->register(new Silex\Provider\SessionServiceProvider());
 
 //Création route home
 $app->get('/', function () use ($app) {
