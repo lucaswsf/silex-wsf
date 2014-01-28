@@ -8,10 +8,10 @@
             <nav>
                 <ul>
                     <li>
-                        <a href="/silex-wsf/public/">Home</a>
+                        <a href="{{ app.url_generator.generate('home') }}">Home</a>
                     </li>
                     <li>
-                        <a href="/silex-wsf/public/admin">Admin</a>
+                        <a href="{{ app.url_generator.generate('getAdmin') }}">Admin</a>
                     </li>
                 </ul>
             </nav>
