@@ -11,7 +11,6 @@ Class UserController extends Controller
      */
     public function getLogin()
     {
-
         return $this->app['twig']->render('user/login.twig', $this->data);
     }
 
@@ -39,7 +38,7 @@ Class UserController extends Controller
             $this->data['errors'] = 'Login or password incorrect';
         }
 
-        if ($this->data['errors'])
+        if (!empty($this->data['errors']))
             return $this->getLogin();
 
         $user = array(
