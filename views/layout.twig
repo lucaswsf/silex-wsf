@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/css/styles.css">
     </head>
     <body>
         <header>
@@ -13,17 +13,19 @@
                     <li>
                         <a href="{{ app.url_generator.generate('getAdmin') }}">Admin</a>
                     </li>
+                    <li>
+                        {% if user %}
+                        <p>Bienvenue, {{ user.name }}</p>
+                        <a href="{{ app.url_generator.generate('logout') }}">Logout</a>
+                        {% else  %}
+                            <a class="connect" href="{{ app.url_generator.generate('login') }}">Login</a>
+                    </li>
+                    <li>
+                            <a href="{{ app.url_generator.generate('register') }}">Register</a>
+                        {% endif %}
+                    </li> 
                 </ul>
             </nav>
-            <div>
-            {% if user is defined %}
-                {% if user %}
-                    <p>Salutation Sirtftfyfty {{ user.name }}</p>
-                {% else  %}
-                    <a href="{{ app.url_generator.generate('login') }}">Login</a>
-                {% endif %}
-            {% endif %}
-            </div>
         </header>
         <div id="content">{% block content %}{% endblock %}</div>
         <div id="footer">
