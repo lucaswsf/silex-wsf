@@ -1,13 +1,14 @@
 {
     "require": {
         "silex/silex": "*",
-        "twig/twig": ">=1.8,<2.0-dev"
+        "twig/twig": ">=1.8,<2.0-dev",
+        "dg/twitter-php": "*"
     },
 
     "autoload": {
         "psr-0": {
             "Blog\\": "class/"
         },
-        "classmap": ["pages/"]
+        "classmap": ["pages/", "models/"]
     }
 }

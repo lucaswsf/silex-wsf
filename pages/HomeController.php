@@ -5,16 +5,37 @@ use Blog\Controller;
 Class HomeController extends Controller
 {
 
-    public function getIndex()
+    /**
+     * Affiche la home page
+     */
+    public function getIndex($idTag = null)
     {
-        $data = array();
+        $this->data['user'] = $this->isLogged();
 
-        $data['user'] = $this->isLogged();
+        $article = new Article($this->app);
+        $this->data['articles'] = $article->getAllArticles($idTag);
 
-        $articles = $this->app['sql']->query('SELECT * FROM  articles');
-        $data['articles'] = $articles->fetchAll();
+        return $this->app['twig']->render('home.twig', $this->data);
+    }
 
-        return $this->app['twig']->render('home.twig', $data);
+    public function getArticle($idArticle)
+    {
+        $article = new Article($this->app);
+        $this->data['article'] = $article->getArticle($idArticle);
+
+        $tag = new Tag($this->app);
+        $tags = $tag->getTagsByArticle($idArticle);
+
+        return $this->app['twig']->render('article.twig', $this->data);
+    }
+
+    public function postComment($idArticle)
+    {
+        if($this->data['user'] == $this->isLogged()){
+
+        }
+
+        $this->getArticle($idArticle);
     }
 
 }

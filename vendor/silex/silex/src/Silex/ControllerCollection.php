@@ -12,7 +12,7 @@
 namespace Silex;
 
 use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\HttpFoundation\Request;
+use Silex\Controller;
 
 /**
  * Builds Silex controllers.
@@ -21,18 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
  * until flush() is called, at which point all controllers are frozen and
  * converted to a RouteCollection.
  *
- * __call() forwards method-calls to Route, but returns instance of ControllerCollection
- * listing Route's methods below, so that IDEs know they are valid
- *
- * @method \Silex\ControllerCollection assert(string $variable, string $regexp)
- * @method \Silex\ControllerCollection value(string $variable, mixed $default)
- * @method \Silex\ControllerCollection convert(string $variable, mixed $callback)
- * @method \Silex\ControllerCollection method(string $method)
- * @method \Silex\ControllerCollection requireHttp()
- * @method \Silex\ControllerCollection requireHttps()
- * @method \Silex\ControllerCollection before(mixed $callback)
- * @method \Silex\ControllerCollection after(mixed $callback)
- *
  * @author Igor Wiedler <igor@wiedler.ch>
  * @author Fabien Potencier <fabien@symfony.com>
  */
@@ -40,8 +28,6 @@ class ControllerCollection
 {
     protected $controllers = array();
     protected $defaultRoute;
-    protected $defaultController;
-    protected $prefix;
 
     /**
      * Constructor.
@@ -49,22 +35,6 @@ class ControllerCollection
     public function __construct(Route $defaultRoute)
     {
         $this->defaultRoute = $defaultRoute;
-        $this->defaultController = function (Request $request) {
-            throw new \LogicException(sprintf('The "%s" route must have code to run when it matches.', $request->attributes->get('_route')));
-        };
-    }
-
-    /**
-     * Mounts controllers under the given route prefix.
-     *
-     * @param string               $prefix      The route prefix
-     * @param ControllerCollection $controllers A ControllerCollection instance
-     */
-    public function mount($prefix, ControllerCollection $controllers)
-    {
-        $controllers->prefix = $prefix;
-
-        $this->controllers[] = $controllers;
     }
 
     /**
@@ -77,12 +47,13 @@ class ControllerCollection
      *
      * @return Controller
      */
-    public function match($pattern, $to = null)
+    public function match($pattern, $to)
     {
         $route = clone $this->defaultRoute;
         $route->setPath($pattern);
+        $route->setDefault('_controller', $to);
+
         $this->controllers[] = $controller = new Controller($route);
-        $route->setDefault('_controller', null === $to ? $this->defaultController : $to);
 
         return $controller;
     }
@@ -95,7 +66,7 @@ class ControllerCollection
      *
      * @return Controller
      */
-    public function get($pattern, $to = null)
+    public function get($pattern, $to)
     {
         return $this->match($pattern, $to)->method('GET');
     }
@@ -108,7 +79,7 @@ class ControllerCollection
      *
      * @return Controller
      */
-    public function post($pattern, $to = null)
+    public function post($pattern, $to)
     {
         return $this->match($pattern, $to)->method('POST');
     }
@@ -121,7 +92,7 @@ class ControllerCollection
      *
      * @return Controller
      */
-    public function put($pattern, $to = null)
+    public function put($pattern, $to)
     {
         return $this->match($pattern, $to)->method('PUT');
     }
@@ -134,22 +105,9 @@ class ControllerCollection
      *
      * @return Controller
      */
-    public function delete($pattern, $to = null)
+    public function delete($pattern, $to)
     {
         return $this->match($pattern, $to)->method('DELETE');
-    }
-
-    /**
-     * Maps a PATCH request to a callable.
-     *
-     * @param string $pattern Matched route pattern
-     * @param mixed  $to      Callback that returns the response when matched
-     *
-     * @return Controller
-     */
-    public function patch($pattern, $to = null)
-    {
-        return $this->match($pattern, $to)->method('PATCH');
     }
 
     public function __call($method, $arguments)
@@ -161,9 +119,7 @@ class ControllerCollection
         call_user_func_array(array($this->defaultRoute, $method), $arguments);
 
         foreach ($this->controllers as $controller) {
-            if ($controller instanceof Controller) {
-                call_user_func_array(array($controller, $method), $arguments);
-            }
+            call_user_func_array(array($controller, $method), $arguments);
         }
 
         return $this;
@@ -181,19 +137,15 @@ class ControllerCollection
         $routes = new RouteCollection();
 
         foreach ($this->controllers as $controller) {
-            if ($controller instanceof Controller) {
-                if (!$name = $controller->getRouteName()) {
-                    $name = $controller->generateRouteName($prefix);
-                    while ($routes->get($name)) {
-                        $name .= '_';
-                    }
-                    $controller->bind($name);
+            if (!$name = $controller->getRouteName()) {
+                $name = $controller->generateRouteName($prefix);
+                while ($routes->get($name)) {
+                    $name .= '_';
                 }
-                $routes->add($name, $controller->getRoute());
-                $controller->freeze();
-            } else {
-                $routes->addCollection($controller->flush($controller->prefix));
+                $controller->bind($name);
             }
+            $routes->add($name, $controller->getRoute());
+            $controller->freeze();
         }
 
         $routes->addPrefix($prefix);

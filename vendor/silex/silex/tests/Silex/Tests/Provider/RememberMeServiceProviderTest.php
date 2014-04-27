@@ -17,6 +17,7 @@ use Silex\Provider\RememberMeServiceProvider;
 use Silex\Provider\SecurityServiceProvider;
 use Silex\Provider\SessionServiceProvider;
 use Symfony\Component\HttpKernel\Client;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * SecurityServiceProvider
@@ -54,7 +55,7 @@ class RememberMeServiceProviderTest extends WebTestCase
         $app = new Application();
 
         $app['debug'] = true;
-        $app['exception_handler']->disable();
+        unset($app['exception_handler']);
 
         $app->register(new SessionServiceProvider(), array(
             'session.test' => true,

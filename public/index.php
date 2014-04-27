@@ -12,6 +12,9 @@ $app['debug'] = true;
 
 //load config
 require_once __DIR__.'/../config/database.php';
+require_once __DIR__.'/../config/twitter.php';
+
+$app['config-silex'] = $config;
 
 //init Database
 $app['sql'] = new Blog\Sql(
@@ -37,19 +40,24 @@ $app->get('/', function () use ($app) {
 })
 ->bind('home');
 
-//Création route /admin
-$app->get('/admin/articles', function () use ($app) {
-    $c = new AdminController($app);
-    return $c->getArticle();
+//Création route home
+$app->get('/article/{idArticle}', function ($idArticle) use ($app) {
+    $c = new HomeController($app);
+    return $c->getArticle($idArticle);
 })
-->bind('getAdmin');
+->bind('article');
 
-//route post /admin
-$app->post('/admin/articles', function () use ($app) {
-    $c = new AdminController($app);
-    return $c->postArticle();
+$app->post('/article/{idArticle}', function ($idArticle) use ($app) {
+    $c = new HomeController($app);
+    return $c->postComment($idArticle);
 })
-->bind('postAdmin');
+->bind('postComment');
+
+$app->get('/filter/{idTag}', function ($idTag) use ($app) {
+    $c = new HomeController($app);
+    return $c->getIndex($idTag);
+})
+->bind('filterArticle');
 
 //route user login
 $app->get('/login', function () use ($app) {
@@ -65,6 +73,13 @@ $app->post('/login', function () use ($app) {
 })
 ->bind('postLogin');
 
+//logout
+$app->get('/logout', function () use ($app) {
+    $c = new UserController($app);
+    return $c->getLogout();
+})
+->bind('logout');
+
 //route user login
 $app->get('/register', function () use ($app) {
     $c = new UserController($app);
@@ -78,6 +93,40 @@ $app->post('/register', function () use ($app) {
     return $c->postRegister();
 })
 ->bind('postRegister');
+
+/*********
+*
+* ADMIN
+*
+* ********/
+
+//Création route /admin
+$app->get('/admin/articles', function () use ($app) {
+    $c = new AdminController($app);
+    return $c->getArticle();
+})
+->bind('getAdminArticle');
+
+//route post /admin
+$app->post('/admin/articles', function () use ($app) {
+    $c = new AdminController($app);
+    return $c->postArticle();
+})
+->bind('postAdminArticle');
+
+//route get /admin
+$app->get('/admin/tags', function () use ($app) {
+    $c = new AdminController($app);
+    return $c->getTag();
+})
+->bind('getAdminTags');
+
+//route post /admin
+$app->post('/admin/tags', function () use ($app) {
+    $c = new AdminController($app);
+    return $c->postTag();
+})
+->bind('postAdminTags');
 
 //run app
 $app->run();

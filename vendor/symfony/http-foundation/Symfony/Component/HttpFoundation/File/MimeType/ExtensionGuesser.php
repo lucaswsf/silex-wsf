@@ -82,15 +82,18 @@ class ExtensionGuesser implements ExtensionGuesserInterface
      * value.
      *
      * @param string $mimeType The mime type
-     *
      * @return string          The guessed extension or NULL, if none could be guessed
      */
     public function guess($mimeType)
     {
         foreach ($this->guessers as $guesser) {
-            if (null !== $extension = $guesser->guess($mimeType)) {
-                return $extension;
+            $extension = $guesser->guess($mimeType);
+
+            if (null !== $extension) {
+                break;
             }
         }
+
+        return $extension;
     }
 }

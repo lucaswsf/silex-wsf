@@ -12,7 +12,7 @@
 namespace Silex;
 
 /**
- * Interface that all Silex service providers must implement.
+ * Interface that must implement all Silex service providers.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */

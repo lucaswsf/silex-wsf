@@ -54,28 +54,17 @@ setting Response HTTP cache headers::
 .. tip::
 
     If you want Silex to trust the ``X-Forwarded-For*`` headers from your
-    reverse proxy at address $ip, you will need to whitelist it as documented
-    in `Trusting Proxies
-    <http://symfony.com/doc/current/components/http_foundation/trusting_proxies.html>`_.
-
-    If you would be running Varnish in front of your application on the same machine:
-    
-    .. code-block:: php
+    reverse proxy at address $ip, you will need to run your application like
+    this::
 
         use Symfony\Component\HttpFoundation\Request;
-        
-        Request::setTrustedProxies(array('127.0.0.1', '::1'));
+
+        Request::setTrustedProxies(array($ip));
         $app->run();
 
 This provider allows you to use the Symfony2 reverse proxy natively with
-Silex applications by using the ``http_cache`` service. The Symfony2 reverse proxy
-acts much like any other proxy would, so you will want to whitelist it:
+Silex applications by using the ``http_cache`` service::
 
-.. code-block:: php
-
-    use Symfony\Component\HttpFoundation\Request;
-        
-    Request::setTrustedProxies(array('127.0.0.1'));
     $app['http_cache']->run();
 
 The provider also provides ESI support::

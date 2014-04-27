@@ -68,12 +68,10 @@ class YamlFileLoaderTest extends \PHPUnit_Framework_TestCase
         $routeCollection = $loader->load('validpattern.yml');
         $routes = $routeCollection->all();
 
-        $this->assertCount(3, $routes, 'Three routes are loaded');
+        $this->assertCount(2, $routes, 'Two routes are loaded');
         $this->assertContainsOnly('Symfony\Component\Routing\Route', $routes);
 
-        $identicalRoutes = array_slice($routes, 0, 2);
-
-        foreach ($identicalRoutes as $route) {
+        foreach ($routes as $route) {
             $this->assertSame('/blog/{slug}', $route->getPath());
             $this->assertSame('{locale}.example.com', $route->getHost());
             $this->assertSame('MyBundle:Blog:show', $route->getDefault('_controller'));
@@ -91,7 +89,7 @@ class YamlFileLoaderTest extends \PHPUnit_Framework_TestCase
         $routeCollection = $loader->load('validresource.yml');
         $routes = $routeCollection->all();
 
-        $this->assertCount(3, $routes, 'Three routes are loaded');
+        $this->assertCount(2, $routes, 'Two routes are loaded');
         $this->assertContainsOnly('Symfony\Component\Routing\Route', $routes);
 
         foreach ($routes as $route) {
@@ -100,8 +98,6 @@ class YamlFileLoaderTest extends \PHPUnit_Framework_TestCase
             $this->assertSame('\d+', $route->getRequirement('foo'));
             $this->assertSame('bar', $route->getOption('foo'));
             $this->assertSame('', $route->getHost());
-            $this->assertSame('context.getMethod() == "POST"', $route->getCondition());
         }
     }
-
 }

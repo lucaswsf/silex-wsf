@@ -13,6 +13,7 @@ namespace Silex\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+
 use Symfony\Component\HttpFoundation\RequestMatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\SecurityContext;
@@ -130,7 +131,7 @@ class SecurityServiceProvider implements ServiceProviderInterface
                 $entryPoint = 'form';
             }
 
-            $app['security.authentication_listener.factory.'.$type] = $app->protect(function ($name, $options) use ($type, $app, $entryPoint) {
+            $app['security.authentication_listener.factory.'.$type] = $app->protect(function($name, $options) use ($type, $app, $entryPoint) {
                 if ($entryPoint && !isset($app['security.entry_point.'.$name.'.'.$entryPoint])) {
                     $app['security.entry_point.'.$name.'.'.$entryPoint] = $app['security.entry_point.'.$entryPoint.'._proto']($name, $options);
                 }
@@ -542,7 +543,7 @@ class SecurityServiceProvider implements ServiceProviderInterface
         foreach ($this->fakeRoutes as $route) {
             list($method, $pattern, $name) = $route;
 
-            $app->$method($pattern)->run(null)->bind($name);
+            $app->$method($pattern, null)->bind($name);
         }
     }
 

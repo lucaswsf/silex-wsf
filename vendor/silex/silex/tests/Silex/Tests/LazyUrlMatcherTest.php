@@ -85,7 +85,7 @@ class LazyUrlMatcherTest extends \PHPUnit_Framework_TestCase
         $matcher = new LazyUrlMatcher(function () use ($urlMatcher) {
             return $urlMatcher;
         });
-        $matcher->setContext($context);
+        $result = $matcher->setContext($context);
     }
 
     /**

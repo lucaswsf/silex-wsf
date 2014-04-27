@@ -42,7 +42,7 @@ use Silex\EventListener\StringToResponseListener;
  */
 class Application extends \Pimple implements HttpKernelInterface, TerminableInterface
 {
-    const VERSION = '1.2.0';
+    const VERSION = '1.1.2';
 
     const EARLY_EVENT = 512;
     const LATE_EVENT  = -512;
@@ -100,14 +100,10 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
             }
             $dispatcher->addSubscriber(new ResponseListener($app['charset']));
             $dispatcher->addSubscriber(new MiddlewareListener($app));
-            $dispatcher->addSubscriber(new ConverterListener($app['routes'], $app['callback_resolver']));
+            $dispatcher->addSubscriber(new ConverterListener($app['routes']));
             $dispatcher->addSubscriber(new StringToResponseListener());
 
             return $dispatcher;
-        });
-
-        $this['callback_resolver'] = $this->share(function () use ($app) {
-            return new CallbackResolver($app);
         });
 
         $this['resolver'] = $this->share(function () use ($app) {
@@ -122,6 +118,8 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
             if (class_exists('Symfony\Component\HttpFoundation\RequestStack')) {
                 return new RequestStack();
             }
+
+            return null;
         });
 
         $this['request_context'] = $this->share(function () use ($app) {
@@ -202,7 +200,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return Controller
      */
-    public function match($pattern, $to = null)
+    public function match($pattern, $to)
     {
         return $this['controllers']->match($pattern, $to);
     }
@@ -215,7 +213,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return Controller
      */
-    public function get($pattern, $to = null)
+    public function get($pattern, $to)
     {
         return $this['controllers']->get($pattern, $to);
     }
@@ -228,7 +226,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return Controller
      */
-    public function post($pattern, $to = null)
+    public function post($pattern, $to)
     {
         return $this['controllers']->post($pattern, $to);
     }
@@ -241,7 +239,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return Controller
      */
-    public function put($pattern, $to = null)
+    public function put($pattern, $to)
     {
         return $this['controllers']->put($pattern, $to);
     }
@@ -254,22 +252,9 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return Controller
      */
-    public function delete($pattern, $to = null)
+    public function delete($pattern, $to)
     {
         return $this['controllers']->delete($pattern, $to);
-    }
-
-    /**
-     * Maps a PATCH request to a callable.
-     *
-     * @param string $pattern Matched route pattern
-     * @param mixed  $to      Callback that returns the response when matched
-     *
-     * @return Controller
-     */
-    public function patch($pattern, $to = null)
-    {
-        return $this['controllers']->patch($pattern, $to);
     }
 
     /**
@@ -283,13 +268,12 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
     public function on($eventName, $callback, $priority = 0)
     {
         if ($this->booted) {
-            $this['dispatcher']->addListener($eventName, $this['callback_resolver']->resolveCallback($callback), $priority);
-
+            $this['dispatcher']->addListener($eventName, $callback, $priority);
             return;
         }
 
         $this['dispatcher'] = $this->share($this->extend('dispatcher', function ($dispatcher, $app) use ($callback, $priority, $eventName) {
-            $dispatcher->addListener($eventName, $app['callback_resolver']->resolveCallback($callback), $priority);
+            $dispatcher->addListener($eventName, $callback, $priority);
 
             return $dispatcher;
         }));
@@ -306,14 +290,12 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      */
     public function before($callback, $priority = 0)
     {
-        $app = $this;
-
-        $this->on(KernelEvents::REQUEST, function (GetResponseEvent $event) use ($callback, $app) {
+        $this->on(KernelEvents::REQUEST, function (GetResponseEvent $event) use ($callback) {
             if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
                 return;
             }
 
-            $ret = call_user_func($app['callback_resolver']->resolveCallback($callback), $event->getRequest());
+            $ret = call_user_func($callback, $event->getRequest());
 
             if ($ret instanceof Response) {
                 $event->setResponse($ret);
@@ -332,14 +314,12 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      */
     public function after($callback, $priority = 0)
     {
-        $app = $this;
-
-        $this->on(KernelEvents::RESPONSE, function (FilterResponseEvent $event) use ($callback, $app) {
+        $this->on(KernelEvents::RESPONSE, function (FilterResponseEvent $event) use ($callback) {
             if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
                 return;
             }
 
-            call_user_func($app['callback_resolver']->resolveCallback($callback), $event->getRequest(), $event->getResponse());
+            call_user_func($callback, $event->getRequest(), $event->getResponse());
         }, $priority);
     }
 
@@ -354,10 +334,8 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      */
     public function finish($callback, $priority = 0)
     {
-        $app = $this;
-
-        $this->on(KernelEvents::TERMINATE, function (PostResponseEvent $event) use ($callback, $app) {
-            call_user_func($app['callback_resolver']->resolveCallback($callback), $event->getRequest(), $event->getResponse());
+        $this->on(KernelEvents::TERMINATE, function (PostResponseEvent $event) use ($callback) {
+            call_user_func($callback, $event->getRequest(), $event->getResponse());
         }, $priority);
     }
 
@@ -427,7 +405,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return StreamedResponse
      */
-    public function stream($callback = null, $status = 200, array $headers = array())
+    public function stream($callback = null, $status = 200, $headers = array())
     {
         return new StreamedResponse($callback, $status, $headers);
     }
@@ -456,7 +434,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @return JsonResponse
      */
-    public function json($data = array(), $status = 200, array $headers = array())
+    public function json($data = array(), $status = 200, $headers = array())
     {
         return new JsonResponse($data, $status, $headers);
     }
@@ -473,7 +451,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
      *
      * @throws \RuntimeException When the feature is not supported, before http-foundation v2.2
      */
-    public function sendFile($file, $status = 200, array $headers = array(), $contentDisposition = null)
+    public function sendFile($file, $status = 200, $headers = array(), $contentDisposition = null)
     {
         return new BinaryFileResponse($file, $status, $headers, true, $contentDisposition);
     }
@@ -496,7 +474,7 @@ class Application extends \Pimple implements HttpKernelInterface, TerminableInte
             throw new \LogicException('The "mount" method takes either a ControllerCollection or a ControllerProviderInterface instance.');
         }
 
-        $this['controllers']->mount($prefix, $controllers);
+        $this['routes']->addCollection($controllers->flush($prefix));
 
         return $this;
     }

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
+        <title>Blog | {% block title %}{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/css/normalize.css">
         <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/css/styles.css">
     </head>
     <body>
@@ -11,12 +14,12 @@
                         <a href="{{ app.url_generator.generate('home') }}">Home</a>
                     </li>
                     <li>
-                        <a href="{{ app.url_generator.generate('getAdmin') }}">Admin</a>
+                        <a href="{{ app.url_generator.generate('getAdminArticle') }}">Admin</a>
                     </li>
                     <li>
                         {% if user is defined and user is not empty %}
                         <p>Bienvenue, {{ user.name }}</p>
-                        <a href="#">Logout</a>
+                        <a href="{{ app.url_generator.generate('logout') }}">Logout</a>
                         {% else  %}
                         <a class="connect" href="{{ app.url_generator.generate('login') }}">Login</a>
                     </li>

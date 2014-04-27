@@ -18,12 +18,10 @@ aims to be:
 
 In a nutshell, you define controllers and map them to routes, all in one step.
 
-Usage
------
-
-.. code-block:: php
+**Let's go!**::
 
     // web/index.php
+
     require_once __DIR__.'/../vendor/autoload.php';
 
     $app = new Silex\Application();
@@ -37,23 +35,17 @@ Usage
 All that is needed to get access to the Framework is to include the
 autoloader.
 
-Next a route for ``/hello/{name}`` that matches for ``GET`` requests is defined.
+Next we define a route to ``/hello/{name}`` that matches for ``GET`` requests.
 When the route matches, the function is executed and the return value is sent
 back to the client.
 
 Finally, the app is run. Visit ``/hello/world`` to see the result. It's really
 that easy!
 
-Installation
-------------
+Installing Silex is as easy as it can get. `Download`_ the archive file,
+extract it, and you're done!
 
-Installing Silex is as easy as it can get. The recommend method is using
-Composer_ and requiring `silex/silex`_.  Another way is to `download`_ the
-archive file and extract it.
-
+.. _Download: http://silex.sensiolabs.org/download
 .. _Symfony2: http://symfony.com/
 .. _Pimple: http://pimple.sensiolabs.org/
 .. _Sinatra: http://www.sinatrarb.com/
-.. _Composer: http://getcomposer.org/
-.. _`download`: http://silex.sensiolabs.org/download
-.. _`silex/silex`: https://packagist.org/packages/silex/silex

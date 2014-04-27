@@ -11,6 +11,7 @@ Class UserController extends Controller
      */
     public function getLogin()
     {
+
         return $this->app['twig']->render('user/login.twig', $this->data);
     }
 
@@ -38,7 +39,7 @@ Class UserController extends Controller
             $this->data['errors'] = 'Login or password incorrect';
         }
 
-        if (!empty($this->data['errors']))
+        if ($this->data['errors'])
             return $this->getLogin();
 
         $user = array(
@@ -48,9 +49,18 @@ Class UserController extends Controller
         );
         $this->app['session']->set('user', $user);
 
-        return $this->app->redirect(
-            $this->app['url_generator']->generate('home')
-        );
+        return $this->redirect('home');
+    }
+
+    /**
+     * Deco
+     * @return [type] [description]
+     */
+    public function getLogout()
+    {
+        $this->app['session']->set('user', null);
+
+        return $this->redirect('home');
     }
 
     /**
@@ -115,6 +125,7 @@ Class UserController extends Controller
             ':name' => $name,
             ':salt' => $salt
         );
+
         $this->app['sql']->prepareExec($sql, $arguments);
 
         return $this->app['twig']->render('user/register-success.twig', $this->data);

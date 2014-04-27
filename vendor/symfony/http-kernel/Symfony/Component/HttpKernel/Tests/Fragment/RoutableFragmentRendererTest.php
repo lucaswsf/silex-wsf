@@ -90,4 +90,9 @@ class Foo
     {
         return $this->foo;
     }
+
+    public function doGenerateFragmentUri(ControllerReference $reference, Request $request, $absolute = false, $strict = true)
+    {
+        return parent::generateFragmentUri($reference, $request, $absolute, $strict);
+    }
 }

@@ -13,15 +13,17 @@ Class AdminController extends Controller
      */
     public function getArticle()
     {
-        $data = array();
-
-        if ($this->isLogged() === false) {
+        //Si user n'est pas admin redirection
+        if(!$this->isAdmin()) {
             return $this->app->redirect(
                 $this->app['url_generator']->generate('home')
             );
         }
 
-        return $this->app['twig']->render('admin.twig', $data);
+        $tag = new Tag($this->app);
+        $this->data['tags'] = $tag->getAll();
+
+        return $this->app['twig']->render('admin/article.twig', $this->data);
     }
 
 
@@ -31,31 +33,61 @@ Class AdminController extends Controller
      */
     public function postArticle()
     {
+        if(!$this->isAdmin()) {
+            return $this->app->redirect(
+                $this->app['url_generator']->generate('home')
+            );
+        }
 
         $title = $this->app['request']->get('title');
         $article = $this->app['request']->get('article');
+        $tags = $this->app['request']->get('tag');
 
         if (!empty($title) && !empty($article)) {
-            $sql = "INSERT INTO articles (
-                id ,
-                title ,
-                body
-            )
-            VALUES (
-                NULL ,
-                :title,
-                :body
-            )";
+            $art = new Article($this->app);
 
-            $arguments = array(
-                ':title' => $title,
-                ':body' => $article,
-            );
+            $idArticle = $art->create($title, $article);
 
-            $this->app['sql']->prepareExec($sql, $arguments);
+            foreach ($tags as $tag) {
+                $art->addTag($idArticle, $tag);
+            }
         }
 
         return $this->getArticle();
+    }
+
+    /**
+     * Get page create tag
+     * @return [type] [description]
+     */
+    public function getTag()
+    {
+        //Si user n'est pas admin redirection
+        if(!$this->isAdmin()) {
+            return $this->app->redirect(
+                $this->app['url_generator']->generate('home')
+            );
+        }
+
+        return $this->app['twig']->render('admin/tag.twig', $this->data);
+    }
+
+    public function postTag()
+    {
+        if(!$this->isAdmin()) {
+            return $this->app->redirect(
+                $this->app['url_generator']->generate('home')
+            );
+        }
+
+        $tag = $this->app['request']->get('tag');
+
+        if (!empty($tag)) {
+            $t = new Tag($this->app);
+            $t->create($tag);
+        }
+
+        return $this->getTag();
     }
 
 }

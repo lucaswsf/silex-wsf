@@ -60,7 +60,7 @@ Usage
 -----
 
 The Session provider provides a ``session`` service. Here is an example that
-authenticates a user and creates a session for them::
+authenticates a user and creates a session for him::
 
     use Symfony\Component\HttpFoundation\Response;
 

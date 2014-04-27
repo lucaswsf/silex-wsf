@@ -1,5 +1,5 @@
-Making sub-Requests
-===================
+How to make sub-requests
+========================
 
 Since Silex is based on the ``HttpKernelInterface``, it allows you to simulate
 requests against your application. This means that you can embed a page within
