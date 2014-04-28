@@ -18,7 +18,6 @@
                     </li>
                     <li>
                         {% if user is defined and user is not empty %}
-                        <p>Bienvenue, {{ user.name }}</p>
                         <a href="{{ app.url_generator.generate('logout') }}">Logout</a>
                         {% else  %}
                         <a class="connect" href="{{ app.url_generator.generate('login') }}">Login</a>
