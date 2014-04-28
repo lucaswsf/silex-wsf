@@ -1,7 +1,7 @@
 {% extends "layout.twig" %}
 
 {% block content %}
-<h1><img src="{{app.request.basepath}}/img/header.jpg"></h1>
+<h1><a href="{{app.request.basepath}}/index.php"><img src="{{app.request.basepath}}/img/header.jpg"></a></h1>
 <form action="" method="post">
     <label for="tag">Nom du Tag :</label>
     <input type="text" name="tag" id="tag" />
