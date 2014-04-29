@@ -2,7 +2,7 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1><a href="{{app.request.basepath}}/index.php"><img src="{{app.request.basepath}}/img/header.jpg"></a></h1>
+    <h1><a href="{{ app.url_generator.generate('home') }}"><img src="{{app.request.basepath}}/img/header.jpg"></a></h1>
     <section>
         {% for articleKey, article in articles %}
             <article>
